@@ -1,0 +1,25 @@
+package ru.valeevaz.requizitufabot.enums;
+
+
+public enum MenuEnum {
+    START("/start", "Запуск бота"),
+    GAMES("/games", "Список игр доступных для записи"),
+    MYDATA("/mydata", "Мои данные"),
+    HELP("/help", "Помощь");
+
+    private String command;
+    private String description;
+
+    MenuEnum(String command, String description) {
+        this.command = command;
+        this.description = description;
+    }
+
+    public String getCommand() {
+        return command;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+}

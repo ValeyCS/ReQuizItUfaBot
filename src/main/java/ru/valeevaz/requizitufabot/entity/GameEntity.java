@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity(name = "games")
@@ -19,7 +20,7 @@ public class GameEntity {
     private String name;
     private String description;
     @Column(name = "date_game")
-    private LocalDate dateGame;
+    private LocalDateTime dateGame;
     @Column(name = "is_active")
     private Boolean isActive;
     @Column(name = "create_date")
@@ -55,11 +56,11 @@ public class GameEntity {
         this.description = description;
     }
 
-    public LocalDate getDateGame() {
+    public LocalDateTime getDateGame() {
         return dateGame;
     }
 
-    public void setDateGame(LocalDate dateGame) {
+    public void setDateGame(LocalDateTime dateGame) {
         this.dateGame = dateGame;
     }
 

@@ -19,8 +19,12 @@ import ru.valeevaz.requizitufabot.config.BotConfig;
 import ru.valeevaz.requizitufabot.entity.UserEntity;
 import ru.valeevaz.requizitufabot.repository.UserRepository;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
+
+import static ru.valeevaz.requizitufabot.enums.ButtonEnum.GAME;
 
 @Slf4j
 @Component
@@ -72,6 +76,21 @@ public class TelegramBot extends TelegramLongPollingBot {
                 default -> sendMessage(chatId, "Sorry");
             }
 
+        } else if (update.hasCallbackQuery()) {
+            String callbackData = update.getCallbackQuery().getData();
+            long messageId = update.getCallbackQuery().getMessage().getMessageId();
+            long chatId = update.getCallbackQuery().getMessage().getChatId();
+
+//            if(callbackData.matches(GAME.getNameButton())){
+//
+//            }else if(callbackData.equals(YES_BUTTON)){
+//                String text = "You pressed YES button";
+//                executeEditMessageText(text, chatId, messageId);
+//            }
+//            else if(callbackData.equals(NO_BUTTON)){
+//                String text = "You pressed NO button";
+//                executeEditMessageText(text, chatId, messageId);
+//            }
         }
     }
 
@@ -81,16 +100,12 @@ public class TelegramBot extends TelegramLongPollingBot {
         sendMessage(chatId, answer);
     }
 
-    private void sendMessage(Long chatId, String message) {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(chatId);
-        sendMessage.setText(message);
+    private void sendMessage(Long chatId, String messageText) {
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId);
+        message.setText(messageText);
 
-        try {
-            execute(sendMessage);
-        } catch (TelegramApiException e) {
-            log.error("Error sendmessage " + e.getMessage());
-        }
+        executeMessage(message);
     }
 
     public List<BotCommand> getStartMenu() {
@@ -99,14 +114,6 @@ public class TelegramBot extends TelegramLongPollingBot {
         for (MenuEnum anEnum: menuEnums) {
             commandList.add(new BotCommand(anEnum.getCommand(), anEnum.getDescription()));
         }
-//        commandList.add(new BotCommand(MenuEnum.START.getCommand(), MenuEnum.START.getDescription()));
-//        commandList.add(new BotCommand("/start", "Запуск бота"));
-//        commandList.add(new BotCommand("/games", "Список игр; доступных для записи"));
-//        commandList.add(new BotCommand("/mygames", "Игры; на которые вы записаны"));
-//        commandList.add(new BotCommand("/mydata", "Мои данные"));
-//        commandList.add(new BotCommand("/delmydata", "Удалить мои данные из бота и запретить их сохранять"));
-//        commandList.add(new BotCommand("/settings", "Личные настройки по работе с ботом"));
-//        commandList.add(new BotCommand("/help", "Помощь по работе с ботом"));
         return commandList;
     }
 
@@ -129,43 +136,29 @@ public class TelegramBot extends TelegramLongPollingBot {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboardButtons = new ArrayList<>();
 
+        String ddMMPattern = "dd.MM";
+        DateTimeFormatter europeanDateFormatter = DateTimeFormatter.ofPattern(ddMMPattern);
+
         List<GameEntity> gameEntities = gameService.getAllGames();
         for (GameEntity game: gameEntities) {
             var buttonMenu = new InlineKeyboardButton();
             List<InlineKeyboardButton> rowInLine = new ArrayList<>();
+            var menuText = new StringJoiner(" ");
+            menuText.add(game.getDateGame().getDayOfWeek().toString());
+            menuText.add(europeanDateFormatter.format(game.getDateGame()));
+            menuText.add(game.getName());
+            menuText.add(game.getLocation().getName());
 
-            buttonMenu.setText(game.getName());
-            buttonMenu.setCallbackData(game.getName());
+            buttonMenu.setText(menuText.toString());
+            buttonMenu.setCallbackData(GAME.getNameButton()+"_"+game.getId());
             rowInLine.add(buttonMenu);
+
             keyboardButtons.add(rowInLine);
         }
         keyboardMarkup.setKeyboard(keyboardButtons);
         message.setReplyMarkup(keyboardMarkup);
 
         executeMessage(message);
-
-//        InlineKeyboardMarkup markupInLine = new InlineKeyboardMarkup();
-//        List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
-//        List<InlineKeyboardButton> rowInLine = new ArrayList<>();
-//        var yesButton = new InlineKeyboardButton();
-//
-//        yesButton.setText("Yes");
-//        yesButton.setCallbackData(YES_BUTTON);
-//
-//        var noButton = new InlineKeyboardButton();
-//
-//        noButton.setText("No");
-//        noButton.setCallbackData(NO_BUTTON);
-//
-//        rowInLine.add(yesButton);
-//        rowInLine.add(noButton);
-//
-//        rowsInLine.add(rowInLine);
-//
-//        markupInLine.setKeyboard(rowsInLine);
-//        message.setReplyMarkup(markupInLine);
-//
-//        executeMessage(message);
     }
 
     private void executeMessage(SendMessage message){

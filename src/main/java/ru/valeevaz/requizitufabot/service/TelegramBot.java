@@ -1,5 +1,7 @@
 package ru.valeevaz.requizitufabot.service;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,17 +16,18 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.valeevaz.requizitufabot.entity.GameEntity;
+import ru.valeevaz.requizitufabot.entity.RecordEntity;
 import ru.valeevaz.requizitufabot.enums.MenuEnum;
 import ru.valeevaz.requizitufabot.config.BotConfig;
 import ru.valeevaz.requizitufabot.entity.UserEntity;
+import ru.valeevaz.requizitufabot.enums.StatusEnum;
 import ru.valeevaz.requizitufabot.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringJoiner;
+import java.util.*;
 
-import static ru.valeevaz.requizitufabot.enums.ButtonEnum.GAME;
+import static ru.valeevaz.requizitufabot.enums.DayOfWeekEnum.findByCode;
 
 @Slf4j
 @Component
@@ -34,7 +37,10 @@ public class TelegramBot extends TelegramLongPollingBot {
     private UserRepository userRepository;
     @Autowired
     private GameService gameService;
-
+    @Autowired
+    private TelegramBotHelper telegramBotHelper;
+    @Autowired
+    private RecordService recordService;
     private final BotConfig botConfig;
 
     public TelegramBot(BotConfig botConfig) {
@@ -59,42 +65,56 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        if (update.hasMessage() && update.getMessage().hasText()) {
+
+        if (update.hasCallbackQuery()) {
+            var callbackQuery = update.getCallbackQuery();
+
+            JsonObject jsonObject = JsonParser.parseString(callbackQuery.getData()).getAsJsonObject();
+            Long telegramUserId =  update.getCallbackQuery().getFrom().getId();
+            Long chatId = update.getCallbackQuery().getMessage().getChatId();
+            String status = jsonObject.get("status").getAsString();
+            GameEntity gameEntity = gameService.getGameId(jsonObject.get("gameId").getAsInt());
+            switch (status){
+                case "new" -> {
+                    var recordGame = new RecordEntity();
+                    recordGame.setTelegramUserId(telegramUserId);
+                    recordGame.setGame(gameEntity);
+                    recordGame.setStatus(StatusEnum.SET_NAME);
+                    recordGame.setCreatedDate(LocalDateTime.now());
+                    recordService.saveRecordGame(recordGame);
+                    var message = telegramBotHelper.setNameUser(chatId, callbackQuery.getFrom().getFirstName(), gameEntity.getId());
+                    executeMessage(message);
+                }
+                default -> sendMessage(chatId, "Sorry");
+            }
+
+        } else if (update.hasMessage() && update.getMessage().hasText()) {
 
             String message = update.getMessage().getText();
             Long chatId = update.getMessage().getChatId();
             String userName = update.getMessage().getChat().getFirstName();
+            Long telegramUserId = update.getMessage().getFrom().getId();
+
+            Long userId = update.getMessage().getFrom().getId();
             switch (message) {
                 case "/start" -> {
-                    AnswerForUser(chatId, userName);
+                    answerForUser(chatId, userName);
 //                    SetUsers(update.getMessage());
                 }
                 case "/games" -> {
                     getMenuListMessage(chatId);
 //                    SetUsers(update.getMessage());
                 }
-                default -> sendMessage(chatId, "Sorry");
+                default -> {
+                    recordService.getActiveRecords(telegramUserId);
+                    sendMessage(chatId, "Sorry");
+                }
             }
 
-        } else if (update.hasCallbackQuery()) {
-            String callbackData = update.getCallbackQuery().getData();
-            long messageId = update.getCallbackQuery().getMessage().getMessageId();
-            long chatId = update.getCallbackQuery().getMessage().getChatId();
-
-//            if(callbackData.matches(GAME.getNameButton())){
-//
-//            }else if(callbackData.equals(YES_BUTTON)){
-//                String text = "You pressed YES button";
-//                executeEditMessageText(text, chatId, messageId);
-//            }
-//            else if(callbackData.equals(NO_BUTTON)){
-//                String text = "You pressed NO button";
-//                executeEditMessageText(text, chatId, messageId);
-//            }
         }
     }
 
-    private void AnswerForUser(Long chatId, String userName) {
+    private void answerForUser(Long chatId, String userName) {
         String answer = "Hi, " + userName + ".! Bla bla";
         log.info("Ответ пользователю " + userName);
         sendMessage(chatId, answer);
@@ -127,30 +147,39 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     public void getMenuListMessage(Long chatId){
 
+        String ddMMPattern = "dd.MM";
+        DateTimeFormatter europeanDateFormatter = DateTimeFormatter.ofPattern(ddMMPattern);
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> keyboardButtons = new ArrayList<>();
         SendMessage message = new SendMessage();
+
         message.setChatId(chatId);
         message.setText("Регистрация на игры в г.Уфа:\n" +
                 "\n" +
                 "Выберите игру, на которую хотите зарегистрироваться");
 
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> keyboardButtons = new ArrayList<>();
-
-        String ddMMPattern = "dd.MM";
-        DateTimeFormatter europeanDateFormatter = DateTimeFormatter.ofPattern(ddMMPattern);
-
-        List<GameEntity> gameEntities = gameService.getAllGames();
+        List<GameEntity> gameEntities = gameService.getAllActiveGames();
         for (GameEntity game: gameEntities) {
             var buttonMenu = new InlineKeyboardButton();
             List<InlineKeyboardButton> rowInLine = new ArrayList<>();
             var menuText = new StringJoiner(" ");
-            menuText.add(game.getDateGame().getDayOfWeek().toString());
+            menuText.add(findByCode(game.getDateGame().getDayOfWeek().getValue()));
+//            menuText.add(game.getDateGame().getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.of("ru","RU")));
             menuText.add(europeanDateFormatter.format(game.getDateGame()));
-            menuText.add(game.getName());
+            if (game.getName() == null) {
+                menuText.add(game.getGamesType().getName());
+            }else{
+                menuText.add(game.getName());
+            }
             menuText.add(game.getLocation().getName());
 
+            var dataGame = new StringJoiner(" ");
+            dataGame.add("{ gameId:");
+            dataGame.add(game.getId().toString());
+            dataGame.add(", status: new }");
+
             buttonMenu.setText(menuText.toString());
-            buttonMenu.setCallbackData(GAME.getNameButton()+"_"+game.getId());
+            buttonMenu.setCallbackData(dataGame.toString());
             rowInLine.add(buttonMenu);
 
             keyboardButtons.add(rowInLine);

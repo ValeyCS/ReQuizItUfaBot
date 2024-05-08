@@ -1,10 +1,9 @@
 package ru.valeevaz.requizitufabot.entity;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.UuidGenerator;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @Entity(name = "games")
@@ -13,8 +12,6 @@ public class GameEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
-//    @Column(name = "type_code")
-//    private Long typeCode;
     @ManyToOne
     private GamesTypeEntity gamesType;
     private String name;
@@ -23,14 +20,13 @@ public class GameEntity {
     private LocalDateTime dateGame;
     @Column(name = "is_active")
     private Boolean isActive;
-    @Column(name = "create_date")
-    private LocalDate createDate;
-//    @Column(name = "location_code")
-//    private Integer location;
+    @Column(name = "created_date")
+    private LocalDateTime createdDate;
     @ManyToOne
-//    @JoinColumn(name = "location_code")
     private LocationEntity location;
     private Long price;
+    @OneToMany(mappedBy = "game", fetch = FetchType.EAGER)
+    private List<RecordEntity> records;
 
     public Integer getId() {
         return id;
@@ -72,12 +68,12 @@ public class GameEntity {
         isActive = active;
     }
 
-    public LocalDate getCreateDate() {
-        return createDate;
+    public LocalDateTime getCreatedDate() {
+        return createdDate;
     }
 
-    public void setCreateDate(LocalDate createDate) {
-        this.createDate = createDate;
+    public void setCreatedDate(LocalDateTime createDate) {
+        this.createdDate = createDate;
     }
 
     public LocationEntity getLocation() {
@@ -104,16 +100,24 @@ public class GameEntity {
         this.name = name;
     }
 
+    public List<RecordEntity> getRecords() {
+        return records;
+    }
+
+    public void setRecords(List<RecordEntity> records) {
+        this.records = records;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         GameEntity that = (GameEntity) o;
-        return Objects.equals(id, that.id) && Objects.equals(gamesType, that.gamesType) && Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(dateGame, that.dateGame) && Objects.equals(isActive, that.isActive) && Objects.equals(createDate, that.createDate) && Objects.equals(location, that.location) && Objects.equals(price, that.price);
+        return Objects.equals(id, that.id) && Objects.equals(gamesType, that.gamesType) && Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(dateGame, that.dateGame) && Objects.equals(isActive, that.isActive) && Objects.equals(createdDate, that.createdDate) && Objects.equals(location, that.location) && Objects.equals(price, that.price);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, gamesType, name, description, dateGame, isActive, createDate, location, price);
+        return Objects.hash(id, gamesType, name, description, dateGame, isActive, createdDate, location, price);
     }
 }

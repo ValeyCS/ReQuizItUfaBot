@@ -13,7 +13,7 @@ public class LocationEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Integer code;
+    private String code;
     private String name;
 
     public Long getId() {
@@ -33,11 +33,11 @@ public class LocationEntity {
         this.name = name;
     }
 
-    public Integer getCode() {
+    public String getCode() {
         return code;
     }
 
-    public void setCode(Integer code) {
+    public void setCode(String code) {
         this.code = code;
     }
 
@@ -46,11 +46,11 @@ public class LocationEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LocationEntity that = (LocationEntity) o;
-        return Objects.equals(id, that.id) && Objects.equals(name, that.name);
+        return Objects.equals(id, that.id) && Objects.equals(code, that.code) && Objects.equals(name, that.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name);
+        return Objects.hash(id, code, name);
     }
 }

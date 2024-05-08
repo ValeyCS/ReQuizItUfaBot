@@ -31,12 +31,13 @@ public class UserController {
                 .body(this.userService.getUser());
     }
 
-    @GetMapping("game")
-    public ResponseEntity<Optional<GameEntity>> handleGetAllGames() {
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(this.gameService.getGame());
-    }
+//    @GetMapping("game")
+//    public ResponseEntity<Optional<GameEntity>> handleGetAllGames() {
+//        Integer id = 1;
+//        return ResponseEntity.ok()
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .body(this.gameService.getGameId(id));
+//    }
 
 //    @PostMapping
 //    private void setGame(@RequestBody GamePayload gamePayload){

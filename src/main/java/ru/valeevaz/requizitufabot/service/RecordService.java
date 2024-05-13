@@ -4,6 +4,7 @@ import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.valeevaz.requizitufabot.entity.RecordEntity;
+import ru.valeevaz.requizitufabot.enums.StatusEnum;
 import ru.valeevaz.requizitufabot.repository.RecordRepository;
 
 import java.util.List;
@@ -44,4 +45,9 @@ public class RecordService {
 //        List<GameEntity> gameEntities = gameRepository.getAllActiveGames(dateNow);
 //        return gameEntities;
 //    }
+
+    public void updateStatusRecord(StatusEnum status, RecordEntity recordEntity){
+        recordEntity.setStatus(status);
+        this.saveRecordGame(recordEntity);
+    }
 }

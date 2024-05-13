@@ -2,42 +2,39 @@ package ru.valeevaz.requizitufabot.enums;
 
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.Optional;
 
 public enum DayOfWeekEnum {
-    MONDAY(1,"Пн"),
-    TUESDAY(2,"Вт"),
-    WEDNESDAY(3,"Ср"),
-    THURSDAY(4,"Чт"),
-    FRIDAY(5,"Пт"),
-    SATURDAY(6,"Сб"),
-    SUNDAY(7,"Вс");
+    MONDAY(1,"Пн", "Понедельник"),
+    TUESDAY(2,"Вт", "Вторник"),
+    WEDNESDAY(3,"Ср","Среда"),
+    THURSDAY(4,"Чт","Четверг"),
+    FRIDAY(5,"Пт","Пятница"),
+    SATURDAY(6,"Сб","Суббота"),
+    SUNDAY(7,"Вс","Воскресенье");
 
-    DayOfWeekEnum(Integer codeDay, String shortNameDay) {
+    DayOfWeekEnum(Integer codeDay, String shortNameDay, String fullNameDay) {
         this.codeDay = codeDay;
         this.shortNameDay = shortNameDay;
+        this.fullNameDay = fullNameDay;
     }
 
     private Integer codeDay;
     private String shortNameDay;
+    private String fullNameDay;
 
     public Integer getCodeDay() {
         return codeDay;
-    }
-
-    public void setCodeDay(Integer codeDay) {
-        this.codeDay = codeDay;
     }
 
     public String getShortNameDay() {
         return shortNameDay;
     }
 
-    public void setShortNameDay(String shortNameDay) {
-        this.shortNameDay = shortNameDay;
+    public String getFullNameDay() {
+        return fullNameDay;
     }
 
-    public static String findByCode(Integer code) {
+    public static String findByCodeShort(Integer code) {
         return Arrays.stream(values())
                 .filter(month -> Objects.equals(month.getCodeDay(), code))
                 .findFirst()
@@ -45,4 +42,11 @@ public enum DayOfWeekEnum {
                 .orElse(null);
     }
 
+    public static String findByCodeFull(Integer code) {
+        return Arrays.stream(values())
+                .filter(month -> Objects.equals(month.getCodeDay(), code))
+                .findFirst()
+                .map(DayOfWeekEnum::getFullNameDay)
+                .orElse(null);
+    }
 }

@@ -4,6 +4,7 @@ package ru.valeevaz.requizitufabot.enums;
 public enum MenuEnum {
     START("/start", "Запуск бота"),
     GAMES("/games", "Список игр доступных для записи"),
+    MYGAMES("/mygames", "Игры на которые вы или ваша команда уже зарегистрированы"),
     MYDATA("/mydata", "Мои данные"),
     HELP("/help", "Помощь");
 

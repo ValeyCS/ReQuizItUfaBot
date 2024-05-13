@@ -4,17 +4,19 @@ public enum StatusEnum {
 
     NEW("new"),
     SET_NAME("name"),
-    SET_TEAM("team"),
-    SET_AMOUNT("amount"),
-    FINISH("finish");
+    SET_TEAM("Напишите, название вашей команды."),
+    SET_AMOUNT("Укажите количество людей в вашей команде на игру."),
+    SET_PHONE("Напишите ваш номер телефона."),
+    FINISH("Регистрация на игру завершена."),
+    VIEW("Регистрация на игру завершена.");
 
-    private final String value;
+    private final String textMessage;
 
-    StatusEnum(String value) {
-        this.value = value;
+    StatusEnum(String textMessage) {
+        this.textMessage = textMessage;
     }
 
-    public String getValue() {
-        return value;
+    public String getTextMessage() {
+        return textMessage;
     }
 }

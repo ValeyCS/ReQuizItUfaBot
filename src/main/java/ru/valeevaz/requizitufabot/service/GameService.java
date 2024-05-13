@@ -9,7 +9,6 @@ import ru.valeevaz.requizitufabot.repository.LocationRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Service
 public class GameService {
@@ -24,7 +23,7 @@ public class GameService {
         this.gamesTypeRepository = gamesTypeRepository;
     }
 
-    public GameEntity getGameId(Integer id) throws NoSuchElementException {
+    public GameEntity getGameById(Integer id) throws NoSuchElementException {
         return gameRepository.findById(id).get();
     }
 
@@ -36,6 +35,12 @@ public class GameService {
     public List<GameEntity> getAllActiveGames(){
         LocalDateTime dateNow = LocalDateTime.now();
         List<GameEntity> gameEntities = gameRepository.getAllActiveGames(dateNow);
+        return gameEntities;
+    }
+
+    public List<GameEntity> getMyActiveGames(Long telegramUserId){
+        LocalDateTime dateNow = LocalDateTime.now();
+        List<GameEntity> gameEntities = gameRepository.getMyActiveGames(telegramUserId, dateNow);
         return gameEntities;
     }
 }

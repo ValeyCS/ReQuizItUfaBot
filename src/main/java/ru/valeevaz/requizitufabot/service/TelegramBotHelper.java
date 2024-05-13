@@ -3,17 +3,12 @@ package ru.valeevaz.requizitufabot.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import ru.valeevaz.requizitufabot.entity.GameEntity;
 
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
-
-import static ru.valeevaz.requizitufabot.enums.DayOfWeekEnum.findByCode;
 
 @Slf4j
 @Component
@@ -47,7 +42,7 @@ public class TelegramBotHelper {
         return message;
     }
 
-    public SendMessage setSimpleMessage(Long chatId, String status, String text, Integer gameId) {
+    public SendMessage setQuestionMessage(Long chatId, String status, String text, Integer gameId) {
 
         SendMessage message = new SendMessage();
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();

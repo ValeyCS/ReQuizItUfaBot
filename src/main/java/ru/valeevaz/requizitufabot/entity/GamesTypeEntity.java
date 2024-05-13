@@ -15,6 +15,7 @@ public class GamesTypeEntity {
     private Long id;
     private String code;
     private String name;
+    private String description;
 
     public Long getId() {
         return id;
@@ -38,6 +39,14 @@ public class GamesTypeEntity {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Override

@@ -22,6 +22,7 @@ public class RecordEntity {
     private String recordedPhone;
     @Column(name = "recorder_team")
     private String recordedTeam;
+    private Integer amount;
 //    @ManyToOne
     @Enumerated(EnumType.STRING)
     private StatusEnum status;
@@ -101,5 +102,13 @@ public class RecordEntity {
 
     public void setTelegramUserId(Long telegramUserId) {
         this.telegramUserId = telegramUserId;
+    }
+
+    public Integer getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Integer amount) {
+        this.amount = amount;
     }
 }

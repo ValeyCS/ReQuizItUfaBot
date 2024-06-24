@@ -20,10 +20,10 @@ public interface GameRepository extends JpaRepository<GameEntity, Integer> {
     List<GameEntity> getAllActiveGames(@Param("date") LocalDateTime date);
 
     @Query(value = """
-            SELECT g FROM ru.valeevaz.requizitufabot.entity.GameEntity g  
-            JOIN ru.valeevaz.requizitufabot.entity.RecordEntity r
-            WHERE r.status  = 'FINISH' and r.telegramUserId=:telegramUserId and g.dateGame>:date 
-            ORDER BY r.createdDate DESC""")
+            SELECT g.* FROM requizit_bot.games g
+               JOIN requizit_bot.records r ON g.id = r.game_id
+               WHERE r.status  = 'FINISH' and r.telegram_user_id=:telegramUserId and g.date_game>:date
+               ORDER BY r.created_date DESC""", nativeQuery = true)
     List<GameEntity> getMyActiveGames(@Param("telegramUserId") Long telegramUserId, @Param("date") LocalDateTime date);
 
 }

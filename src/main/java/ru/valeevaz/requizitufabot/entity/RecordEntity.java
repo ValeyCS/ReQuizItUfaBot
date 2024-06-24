@@ -1,11 +1,27 @@
 package ru.valeevaz.requizitufabot.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 import ru.valeevaz.requizitufabot.enums.StatusEnum;
 
 import java.time.LocalDateTime;
 
+import static lombok.AccessLevel.PRIVATE;
+
 @Entity(name = "records")
+@Builder(toBuilder = true)
+@Data
+//@Entity
+@Setter(PRIVATE)
+@NoArgsConstructor
+@AllArgsConstructor
+//@RequiredArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+//@Data
+
+//@NoArgsConstructor
+//@AllArgsConstructor
+
 public class RecordEntity {
 
     @Id
@@ -23,92 +39,20 @@ public class RecordEntity {
     @Column(name = "recorder_team")
     private String recordedTeam;
     private Integer amount;
-//    @ManyToOne
+    //    @ManyToOne
     @Enumerated(EnumType.STRING)
     private StatusEnum status;
     @Column(name = "chat_id")
     private Long chatId;
     @ManyToOne
+    @JoinColumn(name = "game_id")
     private GameEntity game;
+    @Column(name = "can_delete")
+    private boolean canDelete;
 
 
-    public Integer getId() {
-        return id;
-    }
+//    public boolean isCanDelete(boolean b) {
+//        return canDelete;
+//    }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public LocalDateTime getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(LocalDateTime createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public String getRecordedName() {
-        return recordedName;
-    }
-
-    public void setRecordedName(String recordedName) {
-        this.recordedName = recordedName;
-    }
-
-    public String getRecordedPhone() {
-        return recordedPhone;
-    }
-
-    public void setRecordedPhone(String recordedPhone) {
-        this.recordedPhone = recordedPhone;
-    }
-
-    public String getRecordedTeam() {
-        return recordedTeam;
-    }
-
-    public void setRecordedTeam(String recordedTeam) {
-        this.recordedTeam = recordedTeam;
-    }
-
-    public StatusEnum getStatus() {
-        return status;
-    }
-
-    public void setStatus(StatusEnum status) {
-        this.status = status;
-    }
-
-    public Long getChatId() {
-        return chatId;
-    }
-
-    public void setChatId(Long chatId) {
-        this.chatId = chatId;
-    }
-
-    public GameEntity getGame() {
-        return game;
-    }
-
-    public void setGame(GameEntity game) {
-        this.game = game;
-    }
-
-    public Long getTelegramUserId() {
-        return telegramUserId;
-    }
-
-    public void setTelegramUserId(Long telegramUserId) {
-        this.telegramUserId = telegramUserId;
-    }
-
-    public Integer getAmount() {
-        return amount;
-    }
-
-    public void setAmount(Integer amount) {
-        this.amount = amount;
-    }
 }

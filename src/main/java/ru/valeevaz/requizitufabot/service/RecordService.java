@@ -4,11 +4,13 @@ import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.valeevaz.requizitufabot.entity.RecordEntity;
-import ru.valeevaz.requizitufabot.enums.StatusEnum;
 import ru.valeevaz.requizitufabot.repository.RecordRepository;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
+
+import static ru.valeevaz.requizitufabot.enums.StatusEnum.CANCEL;
 
 @Slf4j
 @Service
@@ -24,10 +26,6 @@ public class RecordService {
         return recordRepository.save(recordGame);
     }
 
-//    public GameEntity getGameId(Integer id) throws NoSuchElementException {
-//        return gameRepository.findById(id).get();
-//    }
-
     public RecordEntity getActiveRecords(Long telegramUserId) throws NotFoundException{
         List<RecordEntity> gameEntities = recordRepository.getActiveRecords(telegramUserId);
         if (gameEntities.isEmpty()) {
@@ -39,15 +37,24 @@ public class RecordService {
         Optional<RecordEntity> recordEntity = gameEntities.stream().findFirst();
         return recordEntity.get();
     }
-//
-//    public List<GameEntity> getAllActiveGames(){
-//        LocalDateTime dateNow = LocalDateTime.now();
-//        List<GameEntity> gameEntities = gameRepository.getAllActiveGames(dateNow);
-//        return gameEntities;
-//    }
 
-    public void updateStatusRecord(StatusEnum status, RecordEntity recordEntity){
-        recordEntity.setStatus(status);
-        this.saveRecordGame(recordEntity);
+    public void deleteRecord(Long telegramUserId, Integer gameId){
+        var recordEntity = recordRepository.findByTelegramUserIdAndGameId(telegramUserId, gameId);
+        try {
+            recordRepository.delete(recordEntity.get());
+        }catch (NoSuchElementException e){
+            log.error("Ошибка при удалении записи с идентификатором игры" + gameId + " :" + e.getMessage());
+        }
     }
+
+    public void cancelRecord(Long telegramUserId, Integer gameId){
+        try {
+            var recordEntity = recordRepository.findByTelegramUserIdAndGameId(telegramUserId, gameId).get();
+            var recordEntitySave = recordEntity.toBuilder().status(CANCEL).canDelete(false).build();
+            recordRepository.save(recordEntitySave);
+        }catch (NoSuchElementException e){
+            log.error("Ошибка при попытке отменить запись с идентификатором игры" + gameId + " :" + e.getMessage());
+        }
+    }
+
 }
